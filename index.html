@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+   <head><title>Function Plotter - Remember Your Graphs!</title>
+   </head>
+
+
+   <body style="background-color: #505050;">
+      <!--canvas id="canvas" width="502" height="108"></canvas-->
+      <p>
+         <input type="text" id="idCustomPlot" value="Math.sin(x *10)"/>
+         <input type="button" value="Eval!" id="idCustomCodeExecute">
+      </p>
+
+      <script type="text/javascript">
+
+         // graph functions with 1 input value
+         var graphs1 = [];
+
+         var customCode = "Math.shin(x)";
+         // var graphTemplate = {
+         //    calc: function (x) {
+         //       return Math.sin(x);
+         //    },
+         //    name: "Template 'sin(x)'"
+         // }
+
+         graphs1.push({
+            calc: function (x) {
+               var y;
+               try {
+                  y = eval(customCode);
+               } catch (ex) {
+                  y = 0;
+               }
+               return y;
+            },
+            name: customCode
+         });
+         graphs1.push({
+            calc: function (x) {
+               return Math.sin(x);
+            },
+            name: "sin(x)"
+         });
+         graphs1.push({
+            calc: function (x) {
+               return Math.cos(x);
+            },
+            name: "cos(x)"
+         });
+         graphs1.push({
+            calc: function (x) {
+               return Math.tan(x);
+            },
+            name: "tan(x)"
+         });
+         graphs1.push({
+            calc: function (x) {
+               return Math.atan(x);
+            },
+            name: "atan(x)"
+         });
+         graphs1.push({
+            calc: function (x) {
+               return (x * x);
+            },
+            name: "(x ^ 2)"
+         });
+         graphs1.push({
+            calc: function (x) {
+               return Math.log(x);
+            },
+            name: "log(x)"
+         });
+         graphs1.push({
+            calc: function (x) {
+               return Math.log2(x);
+            },
+            name: "log2(x)"
+         });
+         graphs1.push({
+            calc: function (x) {
+               return Math.exp(x);
+            },
+            name: "exp(x)"
+         });
+         graphs1.push({
+            calc: function (x) {
+               return Math.expm1(x);
+            },
+            name: "expm1(x)"
+         });
+         graphs1.push({
+            calc: function (x) {
+               return Math.random();
+            },
+            name: "random()"
+         });
+         graphs1.push({
+            calc: function (x) {
+               return (x * x * x * x * x);
+            },
+            name: "x^5"
+         });
+
+
+         function draw(graphObj) {
+
+            //var canvas = document.getElementById("canvas");
+            var elem = document.createElement("div");
+            elem.style.width = "500px";
+            elem.style.height = "300px";
+            elem.innerHTML = graphObj.name;
+            elem.style.backgroundColor = "rgb(250, 250, 210)";
+            elem.style.borderWidth = "3px";
+            elem.style.borderColor = "rgb(128, 128, 128)";
+            elem.style.borderStyle = "double";
+            //elem.style.margin = "1px";
+            elem.style.padding = "2px";
+            elem.style.display = "inline-block";
+
+
+
+            var canvas = document.createElement("canvas");
+            canvas.width = 500;
+            canvas.height = 250;
+
+            elem.appendChild(canvas);
+            document.body.appendChild(elem);
+            graphObj.elem = elem;
+
+            if ((!canvas) || !canvas.getContext) return;
+
+            var axes = {};
+            var ctx = canvas.getContext("2d");
+            axes.x0 = .5 + .5*canvas.width;  // x0 pixels from left to x=0
+            axes.y0 = .5 + .5*canvas.height; // y0 pixels from top to y=0
+            axes.scale = 50;                 // 40 pixels from x=0 to x=1
+            axes.doNegativeX = true;
+
+            drawAxes(ctx,axes);
+            drawGraph(ctx,axes,graphObj.calc,"rgb(255,128,128)",1);
+            //funGraph(ctx,axes,fun2,"rgb(66,44,255)",2);
+         }
+
+         function drawGraph (ctx, axes, func, color, thick) {
+            var xx, yy, dx=4, x0=axes.x0, y0=axes.y0, scale=axes.scale;
+            var iMax = Math.round((ctx.canvas.width-x0)/dx);
+            var iMin = axes.doNegativeX ? Math.round(-x0/dx) : 0;
+            ctx.beginPath();
+            ctx.lineWidth = thick;
+            ctx.strokeStyle = color;
+
+            for (var i=iMin;i<=iMax;i++) {
+               xx = dx*i; yy = scale*(func(xx/scale) - 0);
+               if (i===iMin) {
+                  ctx.moveTo(x0+xx,y0-yy);
+               } else {
+                  ctx.lineTo(x0+xx,y0-yy);
+               }
+            }
+            ctx.stroke();
+         }
+
+         function drawAxes(ctx,axes) {
+            var x0=axes.x0, w=ctx.canvas.width;
+            var y0=axes.y0, h=ctx.canvas.height;
+            var xmin = axes.doNegativeX ? 0 : x0;
+            var scale = axes.scale;
+
+            // Ganzzahlige Hilfsachsen
+            ctx.beginPath();
+            ctx.strokeStyle = "rgb(210, 210, 210)";
+
+            for (var i = -4; i < 5; i++) {
+               scale = i * axes.scale;
+               ctx.moveTo(xmin,y0 + scale);
+               ctx.lineTo(w,y0 + scale);  // X axis
+               ctx.moveTo(x0 + scale,0);
+               ctx.lineTo(x0 + scale,h );  // Y axis
+            }
+            ctx.stroke();
+
+            // 0-Axis
+            ctx.beginPath();
+            ctx.strokeStyle = "rgb(0,0,0)";
+            ctx.moveTo(xmin,y0); ctx.lineTo(w,y0);  // X axis
+            ctx.moveTo(x0,0);    ctx.lineTo(x0,h);  // Y axis
+            ctx.stroke();
+
+         }
+
+         function drawAll() {
+            for (var j = 0; j < graphs1.length; j++) {
+               draw(graphs1[j]);
+            }
+         }
+
+         function clearAll() {
+            for (var j = 0; j < graphs1.length; j++) {
+                document.body.removeChild(graphs1[j].elem);
+            }
+         }
+
+         function init() {
+            drawAll();
+            var but = document.getElementById("idCustomCodeExecute");
+            but.addEventListener("click", function (evt) {
+               customCode = document.getElementById("idCustomPlot").value;
+               graphs1[0].name = customCode;
+               clearAll();
+               drawAll();
+            });
+         }
+
+         init();
+
+      </script>
+
+   </body>
+</html>
